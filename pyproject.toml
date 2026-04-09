@@ -1,0 +1,15 @@
+[project]
+name = "pulser-azure"
+version = "0.1.0"
+description = "A Pulser-compatible package to connect to Azure Pasqal Cloud Services"
+readme = "README.md"
+authors = [{ name = "Alexandre Papin", email = "alexandre.papin@pasqal.com" }]
+requires-python = ">=3.10"
+dependencies = [
+    "azure-quantum>=3.8.0",
+    "pulser-core>=1.7.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.10.7,<0.11.0"]
+build-backend = "uv_build"
