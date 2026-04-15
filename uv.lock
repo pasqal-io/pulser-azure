@@ -1125,12 +1125,14 @@ source = { editable = "." }
 dependencies = [
     { name = "azure-quantum" },
     { name = "pulser-core" },
+    { name = "urllib3" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "azure-quantum", specifier = ">=3.8.0" },
     { name = "pulser-core", specifier = ">=1.7.2" },
+    { name = "urllib3", specifier = ">=2.6.3" },
 ]
 
 [[package]]

@@ -8,6 +8,7 @@ requires-python = ">=3.10"
 dependencies = [
     "azure-quantum>=3.8.0",
     "pulser-core>=1.7.2",
+    "urllib3>=2.6.3",
 ]
 
 [build-system]
