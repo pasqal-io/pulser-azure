@@ -43,6 +43,8 @@ from pulser.json.utils import make_json_compatible
 from pulser.register import TriangularLatticeLayout
 from pulser.result import SampledResult
 
+_UNSET: Any = object()
+
 _PASQAL_PROVIDER_ID = "pasqal"
 _PASQAL_CLOUD_BASE_URL = os.getenv(
     "PASQAL_CLOUD_BASE_URL", "https://apis.pasqal.cloud/core-fast"
@@ -87,34 +89,41 @@ class AzureConnection(RemoteConnection):
             resource_id=resource_id or os.getenv("PULSER_AZURE_RESOURCE_ID"),
             credential=credential,
         )
+        self._device_name_target_map: dict[str, tuple[Device, Pasqal]] = {}
 
     def submit(
         self,
         sequence: Sequence,
         wait: bool = False,
-        open: bool = True,
+        open: bool = _UNSET,
         batch_id: str | None = None,
         **kwargs: Any,
     ) -> RemoteResults:
         """Submit a job for execution."""
-        target = self.device_name_target_map[sequence.device.name]
+        open_explicit = open is not _UNSET
+        open = True if open is _UNSET else open
+
+        target = self._device_name_target_map[sequence.device.name][1]
         job_params = make_json_compatible(kwargs.get("job_params", []))
 
+        # Context manager use case (eg: with backend.open_batch()), even
+        # if connection had a session, create a new one as we're supposed to
+        # be in another context now.
+        if open_explicit is True and open:
+            batch_id = self._setup_session(target)
+
+            return RemoteResults(batch_id=batch_id, connection=self)
+
+        # Present when running backend.run() inside context manager
         if batch_id:
             job_ids = self._submit_jobs(
                 target=target,
                 sequence=sequence,
                 job_params=job_params,
             )
+        # Classic backend.run() call
         else:
-            session = Session(
-                workspace=self._workspace,
-                target=target.name,
-                provider_id=target.provider_id,
-            )
-            self._workspace.open_session(session)
-            target.latest_session = session
-            batch_id = session.id
+            batch_id = self._setup_session(target)
 
             job_ids = self._submit_jobs(
                 target=target,
@@ -131,6 +140,17 @@ class AzureConnection(RemoteConnection):
             self._close_batch(batch_id)
 
         return RemoteResults(batch_id=batch_id, connection=self, job_ids=job_ids)
+
+    def _setup_session(self, target: Pasqal) -> str:
+        session = Session(
+            workspace=self._workspace,
+            target=target.name,
+            provider_id=target.provider_id,
+        )
+        self._workspace.open_session(session)
+        target.latest_session = session
+
+        return session.id
 
     def _submit_jobs(
         self,
@@ -266,6 +286,12 @@ class AzureConnection(RemoteConnection):
 
     def fetch_available_devices(self) -> dict[str, Device]:
         """Fetches the devices available through this connection."""
+
+        # Use the cached map to avoid calling retrieving devices again for
+        # nothing when update_sequence_device is called
+        if self._device_name_target_map:
+            return {k: v[0] for k, v in self._device_name_target_map.items()}
+
         targets = [
             t for t in self._workspace.get_targets(provider_id=_PASQAL_PROVIDER_ID)
         ]
@@ -316,7 +342,6 @@ class AzureConnection(RemoteConnection):
 
                 return Device.from_abstract_repr(device_spec["specs"])
 
-        self.device_name_target_map: dict[str, Pasqal] = {}
         devices = []
 
         for target in targets:
@@ -326,7 +351,7 @@ class AzureConnection(RemoteConnection):
                 logger.warning("Could not build a device for target: %s", target)
                 continue
 
-            self.device_name_target_map[device.name] = target
+            self._device_name_target_map[device.name] = (device, target)
             devices.append(device)
 
         return {device.name: device for device in devices}
@@ -344,9 +369,9 @@ class AzureConnection(RemoteConnection):
     def _close_batch(self, batch_id: str) -> None:
         """Closes a batch using its ID."""
         session = self._workspace.get_session(session_id=batch_id)
+
         self._workspace.close_session(session)
 
     def supports_open_batch(self) -> bool:
         """Flag to confirm this class can support creating an open batch."""
-        # NOTE: Azure quantum supports that, it's us that aren't ready yet regarding azure requirements
-        return False
+        return True
