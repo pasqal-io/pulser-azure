@@ -18,7 +18,7 @@ import os
 import typing
 from typing import Any, Mapping
 
-import numpy as np
+from pulser.backend import EmulationConfig
 import urllib3
 from azure.identity import DefaultAzureCredential
 from azure.quantum import JobStatus as AzureJobStatus
@@ -37,10 +37,8 @@ from pulser.backend.remote import (
     RemoteResultsError,
 )
 from pulser.backend.results import Results
-from pulser.channels import Rydberg, RydbergBeam, RydbergEOM
 from pulser.devices import Device
 from pulser.json.utils import make_json_compatible
-from pulser.register import TriangularLatticeLayout
 from pulser.result import SampledResult
 
 _UNSET: Any = object()
@@ -89,7 +87,9 @@ class AzureConnection(RemoteConnection):
             resource_id=resource_id or os.getenv("PULSER_AZURE_RESOURCE_ID"),
             credential=credential,
         )
-        self._device_name_target_map: dict[str, tuple[Device, Pasqal]] = {}
+        self._target_name_device_map: dict[PasqalTarget, Device] = {}
+        self._target_name_target_map: dict[PasqalTarget, Pasqal] = {}
+        self._device_name_target_map: dict[str, PasqalTarget] = {}
 
     def submit(
         self,
@@ -97,13 +97,23 @@ class AzureConnection(RemoteConnection):
         wait: bool = False,
         open: bool = _UNSET,
         batch_id: str | None = None,
+        emulation_config: EmulationConfig | None = None,
+        target_name: PasqalTarget | None = None,
         **kwargs: Any,
     ) -> RemoteResults:
         """Submit a job for execution."""
         open_explicit = open is not _UNSET
         open = True if open is _UNSET else open
 
-        target = self._device_name_target_map[sequence.device.name][1]
+        if target_name is None:
+            target_name = self._device_name_target_map[sequence.device.name]
+
+        target = self._target_name_target_map.get(target_name)
+        if target is None:
+            raise RuntimeError(
+                f"The target {target_name} isn't available on your workspace"
+            )
+
         job_params = make_json_compatible(kwargs.get("job_params", []))
 
         # Context manager use case (eg: with backend.open_batch()), even
@@ -120,6 +130,7 @@ class AzureConnection(RemoteConnection):
                 target=target,
                 sequence=sequence,
                 job_params=job_params,
+                emulation_config=emulation_config,
             )
         # Classic backend.run() call
         else:
@@ -129,6 +140,7 @@ class AzureConnection(RemoteConnection):
                 target=target,
                 sequence=sequence,
                 job_params=job_params,
+                emulation_config=emulation_config,
             )
 
         if wait:
@@ -157,6 +169,7 @@ class AzureConnection(RemoteConnection):
         target: Pasqal,
         sequence: Sequence,
         job_params: list[JobParams],
+        emulation_config: EmulationConfig | None = None,
     ) -> list[str]:
         sequence = self._add_measurement_to_sequence(sequence)
 
@@ -166,6 +179,10 @@ class AzureConnection(RemoteConnection):
                 sequence.build(**vars)
 
         input_data = {"sequence_builder": sequence.to_abstract_repr()}
+
+        if emulation_config:
+            input_data["emulation_config"] = emulation_config.to_abstract_repr()
+
         job_ids: list[str] = []
 
         if job_params:
@@ -245,6 +262,8 @@ class AzureConnection(RemoteConnection):
         input_data_uri = job.details.input_data_uri
         input_payload = job.download_data(input_data_uri)
 
+        sequence = None
+
         try:
             input_json = json.loads(input_payload.decode("utf8"))
             sequence = Sequence.from_abstract_repr(input_json["sequence_builder"])
@@ -287,74 +306,42 @@ class AzureConnection(RemoteConnection):
     def fetch_available_devices(self) -> dict[str, Device]:
         """Fetches the devices available through this connection."""
 
-        # Use the cached map to avoid calling retrieving devices again for
-        # nothing when update_sequence_device is called
-        if self._device_name_target_map:
-            return {k: v[0] for k, v in self._device_name_target_map.items()}
+        if not self._target_name_device_map:
+            # Only retrieve targets available through current workspace provider's plan
+            targets = [
+                t for t in self._workspace.get_targets(provider_id=_PASQAL_PROVIDER_ID)
+            ]
 
-        targets = [
-            t for t in self._workspace.get_targets(provider_id=_PASQAL_PROVIDER_ID)
-        ]
-        device_specs = self._get_device_specs()
+            # Only build real QPU devices
+            devices = [
+                Device.from_abstract_repr(spec["specs"])
+                for spec in self._get_device_specs()
+            ]
 
-        def _target_to_device(target: Pasqal) -> Device:
-            target_enum = PasqalTarget(target.name)
+            # Iterate over all PasqalTarget values rather than only workspace
+            # targets: free-plan users need real Device objects to author and
+            # validate sequences locally even when their workspace only exposes
+            # an emulator target (e.g. SIM_EMU_FREE).
+            for target_name in PasqalTarget:
+                target = next((t for t in targets if t.name == target_name), None)
 
-            if target_enum.value in PasqalTarget.simulators():
-                return Device(
-                    name=target_enum.name.removeprefix("SIM_"),
-                    max_atom_num=PasqalTarget(target_enum).num_qubits(),
-                    dimensions=2,
-                    rydberg_level=60,
-                    max_radial_distance=38,
-                    min_atom_distance=5,
-                    max_sequence_duration=6000,
-                    max_runs=2000,
-                    requires_layout=True,
-                    accepts_new_layouts=True,
-                    optimal_layout_filling=0.45,
-                    channel_objects=(
-                        Rydberg.Global(
-                            max_abs_detuning=2 * np.pi * 20,
-                            max_amp=2 * np.pi * 2,
-                            clock_period=4,
-                            min_duration=16,
-                            mod_bandwidth=8,
-                            eom_config=RydbergEOM(
-                                limiting_beam=RydbergBeam.RED,
-                                max_limiting_amp=30 * 2 * np.pi,
-                                intermediate_detuning=450 * 2 * np.pi,
-                                mod_bandwidth=40,
-                                controlled_beams=(RydbergBeam.BLUE,),
-                                custom_buffer_time=240,
-                            ),
-                        ),
+                device = next(
+                    (
+                        d
+                        for d in devices
+                        if d.name == target_name.name.removeprefix("QPU_")
                     ),
-                    pre_calibrated_layouts=(TriangularLatticeLayout(61, 5),),
-                    short_description="A realistic device for analog sequence execution.",
-                )
-            else:
-                device_spec = next(
-                    spec
-                    for spec in device_specs
-                    if spec["device_type"] == target_enum.name.removeprefix("QPU_")
+                    None,
                 )
 
-                return Device.from_abstract_repr(device_spec["specs"])
+                if device:
+                    self._target_name_device_map[target_name] = device
+                    self._device_name_target_map[device.name] = target_name
 
-        devices = []
+                if target:
+                    self._target_name_target_map[target_name] = target
 
-        for target in targets:
-            try:
-                device = _target_to_device(target)
-            except StopIteration:
-                logger.warning("Could not build a device for target: %s", target)
-                continue
-
-            self._device_name_target_map[device.name] = (device, target)
-            devices.append(device)
-
-        return {device.name: device for device in devices}
+        return {k: v for k, v in self._target_name_device_map.items()}
 
     def _get_device_specs(self) -> dict:
         response = urllib3.request(
