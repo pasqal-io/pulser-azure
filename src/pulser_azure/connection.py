@@ -16,7 +16,7 @@ import json
 import logging
 import os
 import typing
-from typing import Any, Mapping
+from typing import Any, Iterable, Mapping, cast
 
 from pulser.backend import EmulationConfig
 import urllib3
@@ -25,6 +25,7 @@ from azure.quantum import JobStatus as AzureJobStatus
 from azure.quantum import SessionStatus
 from azure.quantum.job import Job
 from azure.quantum.job.session import Session
+from azure.quantum.target import Target
 from azure.quantum.target.pasqal import Pasqal, PasqalTarget
 from azure.quantum.workspace import Workspace
 from pulser import Sequence
@@ -187,7 +188,7 @@ class AzureConnection(RemoteConnection):
 
         if job_params:
             for params in job_params:
-                job = target.submit(input_data=input_data, input_params=params)
+                job = target.submit(input_data=input_data, input_params={**params})
                 job_ids.append(job.id)
         else:
             job = target.submit(input_data=input_data)
@@ -236,7 +237,9 @@ class AzureConnection(RemoteConnection):
         for job in jobs:
             job.refresh()
 
-            status = _AZURE_JOB_STATUS_MAP.get(job.details.status, JobStatus.ERROR)
+            status = _AZURE_JOB_STATUS_MAP.get(  # ty: ignore[no-matching-overload]
+                job.details.status, JobStatus.ERROR
+            )
 
             result: Results | None = None
             if status == JobStatus.DONE:
@@ -260,12 +263,19 @@ class AzureConnection(RemoteConnection):
         job: Job,
     ) -> SampledResult:
         input_data_uri = job.details.input_data_uri
-        input_payload = job.download_data(input_data_uri)
+        if not input_data_uri:
+            raise ValueError(f"Job {job.id} has no input data URI")
+        input_payload: Any = job.download_data(input_data_uri)
 
         sequence = None
 
         try:
-            input_json = json.loads(input_payload.decode("utf8"))
+            if isinstance(input_payload, (bytes, bytearray)):
+                input_json = json.loads(input_payload.decode("utf8"))
+            elif isinstance(input_payload, str):
+                input_json = json.loads(input_payload)
+            else:
+                input_json = input_payload
             sequence = Sequence.from_abstract_repr(input_json["sequence_builder"])
         except Exception:
             pass
@@ -282,7 +292,8 @@ class AzureConnection(RemoteConnection):
             counter = raw_results
 
         size = None
-        vars = job.details.input_params.get("variables")
+        input_params = job.details.input_params or {}
+        vars = input_params.get("variables") if isinstance(input_params, dict) else None
 
         if vars and "qubits" in vars:
             size = len(vars["qubits"])
@@ -296,7 +307,9 @@ class AzureConnection(RemoteConnection):
     def _get_batch_status(self, batch_id: str) -> BatchStatus:
         """Gets the status of a batch from its ID."""
         session = self._workspace.get_session(session_id=batch_id)
-        return _AZURE_SESSION_STATUS_MAP.get(session.details.status, BatchStatus.ERROR)
+        return _AZURE_SESSION_STATUS_MAP.get(  # ty: ignore[no-matching-overload]
+            session.details.status, BatchStatus.ERROR
+        )
 
     def _get_job_ids(self, batch_id: str) -> list[str]:
         """Gets all the job IDs within a batch."""
@@ -308,9 +321,11 @@ class AzureConnection(RemoteConnection):
 
         if not self._target_name_device_map:
             # Only retrieve targets available through current workspace provider's plan
-            targets = [
-                t for t in self._workspace.get_targets(provider_id=_PASQAL_PROVIDER_ID)
-            ]
+            raw_targets = self._workspace.get_targets(provider_id=_PASQAL_PROVIDER_ID)
+            if isinstance(raw_targets, Target):
+                targets: list[Target] = [raw_targets]
+            else:
+                targets = list(cast(Iterable[Target], raw_targets))
 
             # Only build real QPU devices
             devices = [
@@ -339,7 +354,9 @@ class AzureConnection(RemoteConnection):
                     self._device_name_target_map[device.name] = target_name
 
                 if target:
-                    self._target_name_target_map[target_name] = target
+                    # Targets returned from the pasqal provider are Pasqal
+                    # instances at runtime; cast for the type checker.
+                    self._target_name_target_map[target_name] = cast(Pasqal, target)
 
         return {k: v for k, v in self._target_name_device_map.items()}
 
