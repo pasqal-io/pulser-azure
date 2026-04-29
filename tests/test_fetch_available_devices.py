@@ -27,7 +27,9 @@ def test_qpu_target_and_device_get_paired(connection):
     assert PasqalTarget.QPU_FRESNEL in devices
     assert devices[PasqalTarget.QPU_FRESNEL].name == "FRESNEL"
     assert connection._device_name_target_map == {"FRESNEL": PasqalTarget.QPU_FRESNEL}
-    assert connection._target_name_target_map[PasqalTarget.QPU_FRESNEL] is fresnel_target
+    assert (
+        connection._target_name_target_map[PasqalTarget.QPU_FRESNEL] is fresnel_target
+    )
 
 
 def test_emulator_targets_have_no_device(connection):

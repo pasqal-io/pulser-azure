@@ -43,7 +43,9 @@ def test_parses_raw_counts_when_no_counter_key(connection, sequence):
 
 def test_truncates_atom_order_to_qubit_count_variable(connection, sequence):
     sequence.measure("ground-rydberg")
-    job = _build_job_mock(sequence, input_params={"variables": {"qubits": ["q0", "q1"]}})
+    job = _build_job_mock(
+        sequence, input_params={"variables": {"qubits": ["q0", "q1"]}}
+    )
 
     raw = {"counter": {"00": 10}}
     result = connection._parse_job_result(raw, job)

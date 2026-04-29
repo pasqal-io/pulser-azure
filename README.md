@@ -97,6 +97,29 @@ uv sync
 uv run pytest
 ```
 
+### Linting and formatting
+
+This project uses [`ruff`](https://docs.astral.sh/ruff/) for both linting and formatting:
+
+```bash
+uv run ruff check .          # lint
+uv run ruff check . --fix    # lint and auto-fix
+uv run ruff format .         # format
+```
+
+### Pre-commit hooks
+
+To automatically run ruff (and other checks) before each commit, install the [pre-commit](https://pre-commit.com) hooks:
+
+```bash
+uv run pre-commit install
+```
+
+You can run all hooks manually against the whole repo with:
+
+```bash
+uv run pre-commit run --all-files
+```
+
 ## License
 [License Apache 2.0](LICENSE)
-
