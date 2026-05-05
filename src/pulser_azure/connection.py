@@ -97,7 +97,8 @@ _TARGETS = set(
 class AzureConnection(RemoteConnection):
     """Azure Quantum connection bridge.
 
-    :param resource_id: option resource ID of the Azure workspace, if the provided `resource_id` is None, the value is loaded from the `PULSER_AZURE_RESOURCE_ID` environment variable
+    Args:
+        resource_id: option resource ID of the Azure workspace, if the provided `resource_id` is `None`, the value is loaded from the `PULSER_AZURE_RESOURCE_ID` environment variable.
     """
 
     def __init__(self, resource_id: str | None = None):

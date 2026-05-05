@@ -1,0 +1,52 @@
+site_name: Pulser Azure
+site_description: Azure Quantum provider for Pulser - run quantum sequences on
+  Pasqal neutral atom QPUs via Azure.
+site_url: https://pasqal-io.github.io/pulser-azure/
+repo_url: https://github.com/pasqal-io/pulser-azure
+repo_name: pasqal-io/pulser-azure
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.top
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+
+markdown_extensions:
+  - attr_list
+  - toc:
+      permalink: true
+  - pymdownx.superfences
+  - pymdownx.snippets:
+      base_path: ["."]
+      check_paths: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_signature_annotations: true
+            show_if_no_docstring: true
+            separate_signature: true
+            merge_init_into_class: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            members_order: source
+            filters: ["!^_"]
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - API reference:
+    - Overview: reference/index.md
+    - Connection: reference/connection.md
+    - Backends: reference/backends.md

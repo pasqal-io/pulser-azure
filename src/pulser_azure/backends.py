@@ -21,13 +21,13 @@ from pulser.backend import BitStrings, EmulationConfig
 from pulser.backend.remote import RemoteBackend, RemoteConnection
 
 
-class _RemoteEmulatorBackend(RemoteBackend):
+class BaseRemoteEmulatorBackend(RemoteBackend):
     """Base class for Pasqal cloud emulator backends exposed via Azure.
 
     Subclasses must set:
-        target_name:    the ``PasqalTarget`` the cloud should route to.
-        _default_config: the ``EmulationConfig`` used when the caller does
-                         not explicitly pass ``config=...``.
+        - `target_name`:     the ``PasqalTarget`` the backend should route to.
+        - `_default_config`: the ``EmulationConfig`` used when the caller does
+                             not explicitly pass ``config=...``.
     """
 
     target_name: PasqalTarget
@@ -57,16 +57,16 @@ class _RemoteEmulatorBackend(RemoteBackend):
         }
 
 
-class RemoteEmuSvBackend(_RemoteEmulatorBackend):
+class RemoteEmuSVBackend(BaseRemoteEmulatorBackend):
     target_name = "pasqal.sim.emu-sv"
     _default_config = EmulationConfig(observables=[BitStrings(evaluation_times=[1.0])])
 
 
-class RemoteEmuMPSBackend(_RemoteEmulatorBackend):
+class RemoteEmuMPSBackend(BaseRemoteEmulatorBackend):
     target_name = "pasqal.sim.emu-mps"
     _default_config = EmulationConfig(observables=[BitStrings(evaluation_times=[1.0])])
 
 
-class RemoteEmuFreeBackend(_RemoteEmulatorBackend):
+class RemoteEmuFreeBackend(BaseRemoteEmulatorBackend):
     target_name = "pasqal.sim.emu-free"
     _default_config = EmulationConfig(observables=[BitStrings()])
