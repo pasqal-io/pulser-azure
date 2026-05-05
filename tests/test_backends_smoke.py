@@ -1,37 +1,12 @@
 from __future__ import annotations
-from pulser_azure.connection import _TARGETS
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from azure.quantum.target.pasqal import PasqalTarget
 from pulser import QPUBackend
 
 from pulser_azure import RemoteEmuMPSBackend
-
-
-@pytest.fixture
-def fake_pasqal_targets():
-    targets = {}
-    for target in _TARGETS:
-        m = MagicMock()
-        m.name = target.enum_value
-        m.provider_id = "pasqal"
-        m.submit.return_value = MagicMock(id=f"job-{target.enum_value}")
-        targets[target.enum_value] = m
-    return targets
-
-
-@pytest.fixture
-def wired_connection(connection, fake_pasqal_targets):
-    connection._target_name_target_map = dict(fake_pasqal_targets)
-    connection._device_name_target_map = {"AnalogDevice": PasqalTarget.QPU_FRESNEL}
-    connection._workspace.list_session_jobs.return_value = []
-    connection.update_sequence_device = MagicMock(side_effect=lambda s: s)
-    connection._get_job_ids = MagicMock(
-        side_effect=lambda batch_id: [f"job-{target.enum_value}" for target in _TARGETS]
-    )
-    return connection
 
 
 def test_emulator_backend_submits_to_emulator_target(

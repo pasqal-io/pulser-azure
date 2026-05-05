@@ -123,9 +123,19 @@ class AzureConnection(RemoteConnection):
         target_name: str | None = None,
         **kwargs: Any,
     ) -> RemoteResults:
-        """Submit a job for execution."""
+        """Submit a job for execution.
+
+        Session ownership rule: the caller that opens a session is responsible
+        for closing it.
+
+        - ``open=True`` (open_batch): opens a session, returns without
+          submitting jobs. Caller closes via ``_close_batch`` on exit.
+        - ``batch_id`` provided: submits jobs into the caller's session and
+          leaves it open.
+        - Neither: opens a session, submits jobs, and closes it before
+          returning.
+        """
         open_explicit = open is not _UNSET
-        open = True if open is _UNSET else open
 
         if target_name is None:
             target_name = self._device_name_target_map[sequence.device.name]
@@ -138,15 +148,16 @@ class AzureConnection(RemoteConnection):
 
         job_params = make_json_compatible(kwargs.get("job_params", []))
 
-        # Context manager use case (eg: with backend.open_batch()), even
-        # if connection had a session, create a new one as we're supposed to
-        # be in another context now.
-        if open_explicit is True and open:
+        # Context manager use case (eg: with backend.open_batch()): open a new
+        # session and return immediately. The caller (the open_batch context
+        # manager) owns this session and must close it on __exit__.
+        if open_explicit and open:
             batch_id = self._setup_session(target)
 
             return RemoteResults(batch_id=batch_id, connection=self)
 
-        # Present when running backend.run() inside context manager
+        owns_session = False
+
         if batch_id:
             job_ids = self._submit_jobs(
                 target=target,
@@ -154,9 +165,9 @@ class AzureConnection(RemoteConnection):
                 job_params=job_params,
                 emulation_config=emulation_config,
             )
-        # Classic backend.run() call
         else:
             batch_id = self._setup_session(target)
+            owns_session = True
 
             job_ids = self._submit_jobs(
                 target=target,
@@ -170,7 +181,7 @@ class AzureConnection(RemoteConnection):
                 job = self._workspace.get_job(job_id)
                 job.wait_until_completed()
 
-        if not open:
+        if owns_session:
             self._close_batch(batch_id)
 
         return RemoteResults(batch_id=batch_id, connection=self, job_ids=job_ids)
