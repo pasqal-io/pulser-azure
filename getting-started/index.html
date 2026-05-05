@@ -604,20 +604,22 @@ for the full sequence-writing reference.</p>
 <span class="n">devices</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">fetch_available_devices</span><span class="p">()</span>
 <span class="n">device</span> <span class="o">=</span> <span class="n">devices</span><span class="p">[</span><span class="s2">&quot;pasqal.qpu.fresnel-can1&quot;</span><span class="p">]</span>
 
-<span class="c1"># Create a register of trapped atoms</span>
+<span class="c1"># Create a register of trapped atoms before performing operation on them</span>
 <span class="n">register</span> <span class="o">=</span> <span class="n">Register</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">with_automatic_layout</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
 
-<span class="c1"># Declare the sequence of pulses</span>
+<span class="c1"># Declare the sequence of pulses to perform on the register</span>
 <span class="n">sequence</span> <span class="o">=</span> <span class="n">Sequence</span><span class="p">(</span><span class="n">register</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
 <span class="n">sequence</span><span class="o">.</span><span class="n">declare_channel</span><span class="p">(</span><span class="s2">&quot;rydberg&quot;</span><span class="p">,</span> <span class="s2">&quot;rydberg_global&quot;</span><span class="p">)</span>
 <span class="n">omega_max</span> <span class="o">=</span> <span class="n">sequence</span><span class="o">.</span><span class="n">declare_variable</span><span class="p">(</span><span class="s2">&quot;omega_max&quot;</span><span class="p">)</span>
 
+<span class="c1"># Add a pulse to that channel with the amplitude omega_max</span>
 <span class="n">generic_pulse</span> <span class="o">=</span> <span class="n">Pulse</span><span class="o">.</span><span class="n">ConstantPulse</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">omega_max</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 <span class="n">sequence</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">generic_pulse</span><span class="p">,</span> <span class="s2">&quot;rydberg&quot;</span><span class="p">)</span>
 
-<span class="c1"># Run jobs against the remote backend</span>
+<span class="c1"># Declare a backend based on the sequence and remote connection</span>
 <span class="n">backend</span> <span class="o">=</span> <span class="n">QPUBackend</span><span class="p">(</span><span class="n">sequence</span><span class="o">=</span><span class="n">sequence</span><span class="p">,</span> <span class="n">connection</span><span class="o">=</span><span class="n">connection</span><span class="p">)</span>
 
+<span class="c1"># Run jobs with different arguments over the same sequence and register</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
     <span class="n">job_params</span><span class="o">=</span><span class="p">[</span>
         <span class="p">{</span><span class="s2">&quot;runs&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;omega_max&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">}},</span>
@@ -625,6 +627,7 @@ for the full sequence-writing reference.</p>
     <span class="p">],</span>
     <span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">results</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="running-on-emulators">Running on emulators<a class="headerlink" href="#running-on-emulators" title="Permanent link">&para;</a></h2>
 <p>Pulser Azure exposes several remote emulator backends:</p>
@@ -634,7 +637,42 @@ for the full sequence-writing reference.</p>
 <li><a class="autorefs autorefs-internal" title="            RemoteEmuFreeBackend" href="../reference/backends/#pulser_azure.backends.RemoteEmuFreeBackend"><code>RemoteEmuFreeBackend</code></a> — free-tier emulator</li>
 </ul>
 <p>Use them in place of <code>QPUBackend</code> to run the same sequences without consuming
-real QPU time.</p>
+real QPU time:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pulser_azure</span><span class="w"> </span><span class="kn">import</span> <span class="n">AzureConnection</span><span class="p">,</span> <span class="n">RemoteEmuMPSBackend</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pulser.pulse</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pulse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pulser</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Register</span>
+
+<span class="n">connection</span> <span class="o">=</span> <span class="n">AzureConnection</span><span class="p">()</span>
+
+<span class="c1"># Retrieve all QPU devices</span>
+<span class="n">devices</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">fetch_available_devices</span><span class="p">()</span>
+<span class="n">device</span> <span class="o">=</span> <span class="n">devices</span><span class="p">[</span><span class="s2">&quot;pasqal.qpu.fresnel-can1&quot;</span><span class="p">]</span>
+
+<span class="c1"># Create a register of trapped atoms before performing operation on them</span>
+<span class="n">register</span> <span class="o">=</span> <span class="n">Register</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">with_automatic_layout</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="c1"># Declare the sequence of pulses to perform on the register</span>
+<span class="n">sequence</span> <span class="o">=</span> <span class="n">Sequence</span><span class="p">(</span><span class="n">register</span><span class="p">,</span> <span class="n">device</span><span class="p">)</span>
+<span class="n">sequence</span><span class="o">.</span><span class="n">declare_channel</span><span class="p">(</span><span class="s2">&quot;rydberg&quot;</span><span class="p">,</span> <span class="s2">&quot;rydberg_global&quot;</span><span class="p">)</span>
+<span class="n">omega_max</span> <span class="o">=</span> <span class="n">sequence</span><span class="o">.</span><span class="n">declare_variable</span><span class="p">(</span><span class="s2">&quot;omega_max&quot;</span><span class="p">)</span>
+
+<span class="c1"># Add a pulse to that channel with the amplitude omega_max</span>
+<span class="n">generic_pulse</span> <span class="o">=</span> <span class="n">Pulse</span><span class="o">.</span><span class="n">ConstantPulse</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">omega_max</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+<span class="n">sequence</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">generic_pulse</span><span class="p">,</span> <span class="s2">&quot;rydberg&quot;</span><span class="p">)</span>
+
+<span class="c1"># Declare a backend based on the sequence and remote connection</span>
+<span class="n">backend</span> <span class="o">=</span> <span class="n">RemoteEmuMPSBackend</span><span class="p">(</span><span class="n">sequence</span><span class="o">=</span><span class="n">sequence</span><span class="p">,</span> <span class="n">connection</span><span class="o">=</span><span class="n">connection</span><span class="p">)</span>
+
+<span class="c1"># Run jobs with different arguments over the same sequence and register</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">job_params</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;runs&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;omega_max&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">}},</span>
+        <span class="p">{</span><span class="s2">&quot;runs&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;variables&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;omega_max&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">}},</span>
+    <span class="p">],</span>
+    <span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">results</span><span class="p">)</span>
+</code></pre></div>
 
 
 
