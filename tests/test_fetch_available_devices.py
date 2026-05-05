@@ -34,7 +34,7 @@ def test_qpu_target_and_device_get_paired(connection):
 
 def test_emulator_targets_have_no_device(connection):
     sim_target = MagicMock()
-    sim_target.name = PasqalTarget.SIM_EMU_MPS.value
+    sim_target.name = "pasqal.sim.emu-mps"
 
     connection._workspace.get_targets.return_value = [sim_target]
     connection._get_device_specs = MagicMock(return_value=[])
@@ -42,7 +42,7 @@ def test_emulator_targets_have_no_device(connection):
     devices = connection.fetch_available_devices()
 
     assert devices == {}
-    assert connection._target_name_target_map[PasqalTarget.SIM_EMU_MPS] is sim_target
+    assert connection._target_name_target_map["pasqal.sim.emu-mps"] is sim_target
 
 
 def test_device_name_must_match_target_suffix(connection):

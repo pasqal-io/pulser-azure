@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from dataclasses import dataclass
 import json
 import logging
 import os
@@ -74,6 +75,25 @@ _AZURE_SESSION_STATUS_MAP: dict[SessionStatus, BatchStatus] = {
 }
 
 
+@dataclass(frozen=True)
+class _PasqalTarget:
+    enum_name: str
+    enum_value: str
+
+
+_TARGETS = set(
+    [_PasqalTarget(enum_name=pt.name, enum_value=pt.value) for pt in PasqalTarget]
+    + [
+        _PasqalTarget(enum_name="SIM_EMU_SV", enum_value="pasqal.sim.emu-sv"),
+        _PasqalTarget(enum_name="SIM_EMU_MPS", enum_value="pasqal.sim.emu-mps"),
+        _PasqalTarget(enum_name="SIM_EMU_FREE", enum_value="pasqal.sim.emu-free"),
+        _PasqalTarget(
+            enum_name="QPU_FRESNEL_CAN1", enum_value="pasqal.qpu.fresnel-can1"
+        ),
+    ]
+)
+
+
 class AzureConnection(RemoteConnection):
     """Azure Quantum connection bridge.
 
@@ -88,9 +108,9 @@ class AzureConnection(RemoteConnection):
             resource_id=resource_id or os.getenv("PULSER_AZURE_RESOURCE_ID"),
             credential=credential,
         )
-        self._target_name_device_map: dict[PasqalTarget, Device] = {}
-        self._target_name_target_map: dict[PasqalTarget, Pasqal] = {}
-        self._device_name_target_map: dict[str, PasqalTarget] = {}
+        self._target_name_device_map: dict[str, Device] = {}
+        self._target_name_target_map: dict[str, Pasqal] = {}
+        self._device_name_target_map: dict[str, str] = {}
 
     def submit(
         self,
@@ -99,7 +119,7 @@ class AzureConnection(RemoteConnection):
         open: bool = _UNSET,
         batch_id: str | None = None,
         emulation_config: EmulationConfig | None = None,
-        target_name: PasqalTarget | None = None,
+        target_name: str | None = None,
         **kwargs: Any,
     ) -> RemoteResults:
         """Submit a job for execution."""
@@ -337,26 +357,30 @@ class AzureConnection(RemoteConnection):
             # targets: free-plan users need real Device objects to author and
             # validate sequences locally even when their workspace only exposes
             # an emulator target (e.g. SIM_EMU_FREE).
-            for target_name in PasqalTarget:
-                target = next((t for t in targets if t.name == target_name), None)
+            for _target in _TARGETS:
+                target = next(
+                    (t for t in targets if t.name == _target.enum_value), None
+                )
 
                 device = next(
                     (
                         d
                         for d in devices
-                        if d.name == target_name.name.removeprefix("QPU_")
+                        if d.name == _target.enum_name.removeprefix("QPU_")
                     ),
                     None,
                 )
 
                 if device:
-                    self._target_name_device_map[target_name] = device
-                    self._device_name_target_map[device.name] = target_name
+                    self._target_name_device_map[_target.enum_value] = device
+                    self._device_name_target_map[device.name] = _target.enum_value
 
                 if target:
                     # Targets returned from the pasqal provider are Pasqal
                     # instances at runtime; cast for the type checker.
-                    self._target_name_target_map[target_name] = cast(Pasqal, target)
+                    self._target_name_target_map[_target.enum_value] = cast(
+                        Pasqal, target
+                    )
 
         return {k: v for k, v in self._target_name_device_map.items()}
 

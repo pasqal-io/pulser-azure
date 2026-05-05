@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pulser_azure.connection import _TARGETS
 
 from unittest.mock import MagicMock, patch
 
@@ -12,12 +13,12 @@ from pulser_azure import RemoteEmuMPSBackend
 @pytest.fixture
 def fake_pasqal_targets():
     targets = {}
-    for pt in PasqalTarget:
+    for target in _TARGETS:
         m = MagicMock()
-        m.name = pt.value
+        m.name = target.enum_value
         m.provider_id = "pasqal"
-        m.submit.return_value = MagicMock(id=f"job-{pt.name}")
-        targets[pt] = m
+        m.submit.return_value = MagicMock(id=f"job-{target.enum_value}")
+        targets[target.enum_value] = m
     return targets
 
 
@@ -28,7 +29,7 @@ def wired_connection(connection, fake_pasqal_targets):
     connection._workspace.list_session_jobs.return_value = []
     connection.update_sequence_device = MagicMock(side_effect=lambda s: s)
     connection._get_job_ids = MagicMock(
-        side_effect=lambda batch_id: [f"job-{pt.name}" for pt in PasqalTarget]
+        side_effect=lambda batch_id: [f"job-{target.enum_value}" for target in _TARGETS]
     )
     return connection
 
@@ -42,7 +43,7 @@ def test_emulator_backend_submits_to_emulator_target(
         session_cls.return_value.id = "session-1"
         backend.run(job_params=[{"runs": 5}], wait=False)
 
-    fake_pasqal_targets[PasqalTarget.SIM_EMU_MPS].submit.assert_called_once()
+    fake_pasqal_targets["pasqal.sim.emu-mps"].submit.assert_called_once()
     fake_pasqal_targets[PasqalTarget.QPU_FRESNEL].submit.assert_not_called()
 
 
@@ -56,7 +57,7 @@ def test_qpu_backend_submits_to_target_matching_sequence_device(
         backend.run(job_params=[{"runs": 5}], wait=False)
 
     fake_pasqal_targets[PasqalTarget.QPU_FRESNEL].submit.assert_called_once()
-    fake_pasqal_targets[PasqalTarget.SIM_EMU_MPS].submit.assert_not_called()
+    fake_pasqal_targets["pasqal.sim.emu-mps"].submit.assert_not_called()
 
 
 def test_unknown_workspace_target_raises(sequence, wired_connection):

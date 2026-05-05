@@ -58,15 +58,15 @@ class _RemoteEmulatorBackend(RemoteBackend):
 
 
 class RemoteEmuSvBackend(_RemoteEmulatorBackend):
-    target_name = PasqalTarget.SIM_EMU_SV
+    target_name = "pasqal.sim.emu-sv"
     _default_config = EmulationConfig(observables=[BitStrings(evaluation_times=[1.0])])
 
 
 class RemoteEmuMPSBackend(_RemoteEmulatorBackend):
-    target_name = PasqalTarget.SIM_EMU_MPS
+    target_name = "pasqal.sim.emu-mps"
     _default_config = EmulationConfig(observables=[BitStrings(evaluation_times=[1.0])])
 
 
 class RemoteEmuFreeBackend(_RemoteEmulatorBackend):
-    target_name = PasqalTarget.SIM_EMU_FREE
+    target_name = "pasqal.sim.emu-free"
     _default_config = EmulationConfig(observables=[BitStrings()])
