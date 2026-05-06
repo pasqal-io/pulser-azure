@@ -1,0 +1,41 @@
+name: Publish to TestPyPI
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: publish-testpypi
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/pulser-azure/
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Build distributions
+        run: uv build --no-sources
+
+      - name: Publish to TestPyPI
+        run: uv publish --check-url https://test.pypi.org/simple/
+        env:
+          UV_PUBLISH_URL: https://test.pypi.org/legacy/
+          UV_PUBLISH_NO_ATTESTATIONS: false

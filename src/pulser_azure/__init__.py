@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__all__ = ["AzureConnection"]
+__all__ = ["AzureConnection", "__version__"]
 
+from pulser_azure._version import __version__
 from pulser_azure.connection import AzureConnection
