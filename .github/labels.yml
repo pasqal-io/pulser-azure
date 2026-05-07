@@ -1,0 +1,27 @@
+- name: documentation
+  color: "0075ca"
+  description: Documentation changes
+
+- name: dependencies
+  color: "0366d6"
+  description: Dependency updates
+
+- name: ci
+  color: "fbca04"
+  description: CI/CD and workflow changes
+
+- name: feature
+  color: "a2eeef"
+  description: New feature or enhancement
+
+- name: bug
+  color: "d73a4a"
+  description: Bug fix
+
+- name: chore
+  color: "cfd3d7"
+  description: Maintenance, refactoring, or other non-functional changes
+
+- name: breaking-change
+  color: "b60205"
+  description: Backwards-incompatible change
