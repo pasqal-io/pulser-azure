@@ -197,12 +197,8 @@ class AzureConnection(RemoteConnection):
 
         job_ids: list[str] = []
 
-        if job_params:
-            for params in job_params:
-                job = target.submit(input_data=input_data, input_params={**params})
-                job_ids.append(job.id)
-        else:
-            job = target.submit(input_data=input_data)
+        for params in job_params:
+            job = target.submit(input_data=input_data, input_params={**params})
             job_ids.append(job.id)
 
         return job_ids
