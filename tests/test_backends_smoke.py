@@ -5,14 +5,14 @@ from unittest.mock import patch
 import pytest
 from pulser import QPUBackend
 
-from pulser_azure import RemoteEmuMPSBackend
+from pulser_azure import EmuMPSBackend
 from tests.conftest import _DEFAULT_QPU_TARGET, _EMU_MPS_TARGET
 
 
 def test_emulator_backend_submits_to_emulator_target(
     sequence, wired_connection, fake_pasqal_targets
 ):
-    backend = RemoteEmuMPSBackend(sequence=sequence, connection=wired_connection)
+    backend = EmuMPSBackend(sequence=sequence, connection=wired_connection)
 
     with patch("pulser_azure.connection.Session") as session_cls:
         session_cls.return_value.id = "session-1"

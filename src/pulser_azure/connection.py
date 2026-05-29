@@ -18,6 +18,7 @@ import os
 import typing
 from typing import Any, Mapping
 
+from pasqal_cloud.device.device_types import DeviceTypeName
 from pulser.backend import EmulationConfig
 import urllib3
 from azure.identity import DefaultAzureCredential
@@ -70,8 +71,13 @@ _AZURE_SESSION_STATUS_MAP: dict[SessionStatus, BatchStatus] = {
     SessionStatus.TIMED_OUT: BatchStatus.TIMED_OUT,
 }
 
-_QPU_DEVICE_NAME_TARGET_NAME_MAP: dict[str, str] = {
-    "FRESNEL_CAN1": "pasqal.qpu.fresnel-can1"
+_QPU_DEVICE_NAME_TARGET_NAME_MAP: dict[DeviceTypeName, str] = {
+    DeviceTypeName.FRESNEL_CAN1: "pasqal.qpu.fresnel-can1"
+}
+_EMU_DEVICE_NAME_TARGET_NAME_MAP: dict[DeviceTypeName, str] = {
+    DeviceTypeName.EMU_MPS: "pasqal.sim.emu-mps",
+    DeviceTypeName.EMU_SV: "pasqal.sim.emu-sv",
+    DeviceTypeName.EMU_FREE: "pasqal.sim.emu-free",
 }
 
 # Reversed map to get the Azure target name from Pasqal's device type name
@@ -102,14 +108,16 @@ class AzureConnection(RemoteConnection):
         wait: bool = False,
         open: bool = False,
         batch_id: str | None = None,
-        emulation_config: EmulationConfig | None = None,
-        target_name: str | None = None,
+        device_type: DeviceTypeName | None = None,
+        backend_configuration: EmulationConfig | None = None,
         **kwargs: Any,
     ) -> RemoteResults:
 
-        # target_name is set only when using BaseRemoteEmulatorBackend
-        if target_name is None:
+        # device_type is set only when using RemoteEmulatorBackend
+        if device_type is None:
             target_name = _QPU_DEVICE_NAME_TARGET_NAME_MAP[sequence.device.name]
+        else:
+            target_name = _EMU_DEVICE_NAME_TARGET_NAME_MAP[device_type]
 
         target: Pasqal | None = self._workspace.get_targets(  # ty: ignore[invalid-assignment]
             name=target_name, provider_id=_PASQAL_PROVIDER_ID
@@ -142,7 +150,7 @@ class AzureConnection(RemoteConnection):
                 target=target,
                 sequence=sequence,
                 job_params=job_params,
-                emulation_config=emulation_config,
+                emulation_config=backend_configuration,
             )
         else:
             batch_id = self._setup_session(target)
@@ -152,7 +160,7 @@ class AzureConnection(RemoteConnection):
                 target=target,
                 sequence=sequence,
                 job_params=job_params,
-                emulation_config=emulation_config,
+                emulation_config=backend_configuration,
             )
 
         if wait:
@@ -333,7 +341,7 @@ class AzureConnection(RemoteConnection):
         ]
 
         return {
-            _QPU_DEVICE_NAME_TARGET_NAME_MAP[d.name]: d
+            _QPU_DEVICE_NAME_TARGET_NAME_MAP[d.name]: d  # ty: ignore[invalid-argument-type]
             for d in devices
             if d.name in _QPU_DEVICE_NAME_TARGET_NAME_MAP
         }

@@ -14,14 +14,14 @@
 
 __all__ = [
     "AzureConnection",
-    "RemoteEmuSVBackend",
-    "RemoteEmuMPSBackend",
-    "RemoteEmuFreeBackend",
+    "EmuMPSBackend",
+    "EmuSVBackend",
+    "EmuFreeBackend",
 ]
 
 from pulser_azure.connection import AzureConnection
-from pulser_azure.backends import (
-    RemoteEmuSVBackend,
-    RemoteEmuMPSBackend,
-    RemoteEmuFreeBackend,
+from pasqal_cloud.backends import (
+    EmuMPSBackend,
+    EmuSVBackend,
+    EmuFreeBackend,
 )
