@@ -41,8 +41,6 @@ from pulser.devices import Device
 from pulser.json.utils import make_json_compatible
 from pulser.result import SampledResult
 
-_UNSET: Any = object()
-
 _PASQAL_PROVIDER_ID = "pasqal"
 _PASQAL_CLOUD_BASE_URL = os.getenv(
     "PASQAL_CLOUD_BASE_URL", "https://apis.pasqal.cloud/core-fast"
@@ -102,25 +100,12 @@ class AzureConnection(RemoteConnection):
         self,
         sequence: Sequence,
         wait: bool = False,
-        open: bool = _UNSET,
+        open: bool = False,
         batch_id: str | None = None,
         emulation_config: EmulationConfig | None = None,
         target_name: str | None = None,
         **kwargs: Any,
     ) -> RemoteResults:
-        """Submit a job for execution.
-
-        Session ownership rule: the caller that opens a session is responsible
-        for closing it.
-
-        - ``open=True`` (open_batch): opens a session, returns without
-          submitting jobs. Caller closes via ``_close_batch`` on exit.
-        - ``batch_id`` provided: submits jobs into the caller's session and
-          leaves it open.
-        - Neither: opens a session, submits jobs, and closes it before
-          returning.
-        """
-        open_explicit = open is not _UNSET
 
         # target_name is set only when using BaseRemoteEmulatorBackend
         if target_name is None:
@@ -140,7 +125,7 @@ class AzureConnection(RemoteConnection):
         # Context manager use case (eg: with backend.open_batch()): open a new
         # session and return immediately. The caller (the open_batch context
         # manager) owns this session and must close it on __exit__.
-        if open_explicit and open:
+        if open:
             batch_id = self._setup_session(target)
 
             return RemoteResults(batch_id=batch_id, connection=self)
