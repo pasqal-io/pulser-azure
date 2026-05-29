@@ -253,7 +253,7 @@ class AzureConnection(RemoteConnection):
             )
 
             result: Results | None = None
-            if status == JobStatus.DONE:
+            if job.has_succeeded():
                 try:
                     raw_results = job.get_results()
                     result = self._parse_job_result(raw_results, job)
