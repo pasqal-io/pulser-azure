@@ -41,8 +41,6 @@ from pulser.devices import Device
 from pulser.json.utils import make_json_compatible
 from pulser.result import SampledResult
 
-_UNSET: Any = object()
-
 _PASQAL_PROVIDER_ID = "pasqal"
 _PASQAL_CLOUD_BASE_URL = os.getenv(
     "PASQAL_CLOUD_BASE_URL", "https://apis.pasqal.cloud/core-fast"
@@ -98,7 +96,7 @@ class AzureConnection(RemoteConnection):
         self,
         sequence: Sequence,
         wait: bool = False,
-        open: bool = _UNSET,
+        open: bool = False,
         batch_id: str | None = None,
         emulation_config: EmulationConfig | None = None,
         target_name: str | None = None,
@@ -116,7 +114,6 @@ class AzureConnection(RemoteConnection):
         - Neither: opens a session, submits jobs, and closes it before
           returning.
         """
-        open_explicit = open is not _UNSET
 
         # target_name is set only when using BaseRemoteEmulatorBackend
         if target_name is None:
@@ -136,7 +133,7 @@ class AzureConnection(RemoteConnection):
         # Context manager use case (eg: with backend.open_batch()): open a new
         # session and return immediately. The caller (the open_batch context
         # manager) owns this session and must close it on __exit__.
-        if open_explicit and open:
+        if open:
             batch_id = self._setup_session(target)
 
             return RemoteResults(batch_id=batch_id, connection=self)
@@ -208,12 +205,8 @@ class AzureConnection(RemoteConnection):
 
         job_ids: list[str] = []
 
-        if job_params:
-            for params in job_params:
-                job = target.submit(input_data=input_data, input_params={**params})
-                job_ids.append(job.id)
-        else:
-            job = target.submit(input_data=input_data)
+        for params in job_params:
+            job = target.submit(input_data=input_data, input_params={**params})
             job_ids.append(job.id)
 
         return job_ids
@@ -264,7 +257,7 @@ class AzureConnection(RemoteConnection):
             )
 
             result: Results | None = None
-            if status == JobStatus.DONE:
+            if job.has_succeeded():
                 try:
                     raw_results = job.get_results()
                     result = self._parse_job_result(raw_results, job)
