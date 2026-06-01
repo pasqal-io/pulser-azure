@@ -736,17 +736,14 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>src/pulser_azure/connection.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="n">credential</span> <span class="o">=</span> <span class="n">DefaultAzureCredential</span><span class="p">(</span>
         <span class="n">exclude_interactive_browser_credential</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">)</span>
@@ -754,9 +751,6 @@
         <span class="n">resource_id</span><span class="o">=</span><span class="n">resource_id</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;PULSER_AZURE_RESOURCE_ID&quot;</span><span class="p">),</span>
         <span class="n">credential</span><span class="o">=</span><span class="n">credential</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_target_name_device_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Device</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_target_name_target_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Pasqal</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_device_name_target_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -809,7 +803,18 @@ for closing it.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/pulser_azure/connection.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">108</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
@@ -878,9 +883,7 @@ for closing it.</p>
 <span class="normal">174</span>
 <span class="normal">175</span>
 <span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span>
+<span class="normal">177</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">sequence</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
     <span class="n">wait</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -904,11 +907,15 @@ for closing it.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">open_explicit</span> <span class="o">=</span> <span class="nb">open</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_UNSET</span>
 
+    <span class="c1"># target_name is set only when using BaseRemoteEmulatorBackend</span>
     <span class="k">if</span> <span class="n">target_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">target_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_device_name_target_map</span><span class="p">[</span><span class="n">sequence</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">target_name</span> <span class="o">=</span> <span class="n">_QPU_DEVICE_NAME_TARGET_NAME_MAP</span><span class="p">[</span><span class="n">sequence</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
 
-    <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_name_target_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target_name</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">Pasqal</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="o">.</span><span class="n">get_targets</span><span class="p">(</span>  <span class="c1"># ty: ignore[invalid-assignment]</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">target_name</span><span class="p">,</span> <span class="n">provider_id</span><span class="o">=</span><span class="n">_PASQAL_PROVIDER_ID</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;The target </span><span class="si">{</span><span class="n">target_name</span><span class="si">}</span><span class="s2"> isn&#39;t available on your workspace&quot;</span>
         <span class="p">)</span>
@@ -926,6 +933,11 @@ for closing it.</p>
     <span class="n">owns_session</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">batch_id</span><span class="p">:</span>
+        <span class="c1"># when fetching the target from azure, the session isn&#39;t attached</span>
+        <span class="c1"># to it even if it is still open</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="o">.</span><span class="n">get_session</span><span class="p">(</span><span class="n">batch_id</span><span class="p">)</span>
+        <span class="n">target</span><span class="o">.</span><span class="n">latest_session</span> <span class="o">=</span> <span class="n">session</span>
+
         <span class="n">job_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_submit_jobs</span><span class="p">(</span>
             <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
             <span class="n">sequence</span><span class="o">=</span><span class="n">sequence</span><span class="p">,</span>
@@ -976,7 +988,9 @@ for closing it.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/pulser_azure/connection.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">343</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
 <span class="normal">344</span>
 <span class="normal">345</span>
 <span class="normal">346</span>
@@ -987,88 +1001,20 @@ for closing it.</p>
 <span class="normal">351</span>
 <span class="normal">352</span>
 <span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span>
-<span class="normal">358</span>
-<span class="normal">359</span>
-<span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span>
-<span class="normal">363</span>
-<span class="normal">364</span>
-<span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span>
-<span class="normal">371</span>
-<span class="normal">372</span>
-<span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_available_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Device</span><span class="p">]:</span>
+<span class="normal">354</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_available_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Device</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetches the devices available through this connection.&quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_name_device_map</span><span class="p">:</span>
-        <span class="c1"># Only retrieve targets available through current workspace provider&#39;s plan</span>
-        <span class="n">raw_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="o">.</span><span class="n">get_targets</span><span class="p">(</span><span class="n">provider_id</span><span class="o">=</span><span class="n">_PASQAL_PROVIDER_ID</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw_targets</span><span class="p">,</span> <span class="n">Target</span><span class="p">):</span>
-            <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Target</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">raw_targets</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">targets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">Iterable</span><span class="p">[</span><span class="n">Target</span><span class="p">],</span> <span class="n">raw_targets</span><span class="p">))</span>
+    <span class="c1"># Only build real QPU devices</span>
+    <span class="n">devices</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">Device</span><span class="o">.</span><span class="n">from_abstract_repr</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;specs&quot;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_device_specs</span><span class="p">()</span>
+    <span class="p">]</span>
 
-        <span class="c1"># Only build real QPU devices</span>
-        <span class="n">devices</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">Device</span><span class="o">.</span><span class="n">from_abstract_repr</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">&quot;specs&quot;</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_device_specs</span><span class="p">()</span>
-        <span class="p">]</span>
-
-        <span class="c1"># Iterate over all PasqalTarget values rather than only workspace</span>
-        <span class="c1"># targets: free-plan users need real Device objects to author and</span>
-        <span class="c1"># validate sequences locally even when their workspace only exposes</span>
-        <span class="c1"># an emulator target (e.g. SIM_EMU_FREE).</span>
-        <span class="k">for</span> <span class="n">_target</span> <span class="ow">in</span> <span class="n">_TARGETS</span><span class="p">:</span>
-            <span class="n">target</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">targets</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">_target</span><span class="o">.</span><span class="n">enum_value</span><span class="p">),</span> <span class="kc">None</span>
-            <span class="p">)</span>
-
-            <span class="n">device</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
-                <span class="p">(</span>
-                    <span class="n">d</span>
-                    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span>
-                    <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">_target</span><span class="o">.</span><span class="n">enum_name</span><span class="o">.</span><span class="n">removeprefix</span><span class="p">(</span><span class="s2">&quot;QPU_&quot;</span><span class="p">)</span>
-                <span class="p">),</span>
-                <span class="kc">None</span><span class="p">,</span>
-            <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">device</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_target_name_device_map</span><span class="p">[</span><span class="n">_target</span><span class="o">.</span><span class="n">enum_value</span><span class="p">]</span> <span class="o">=</span> <span class="n">device</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_device_name_target_map</span><span class="p">[</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">_target</span><span class="o">.</span><span class="n">enum_value</span>
-
-            <span class="k">if</span> <span class="n">target</span><span class="p">:</span>
-                <span class="c1"># Targets returned from the pasqal provider are Pasqal</span>
-                <span class="c1"># instances at runtime; cast for the type checker.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_target_name_target_map</span><span class="p">[</span><span class="n">_target</span><span class="o">.</span><span class="n">enum_value</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
-                    <span class="n">Pasqal</span><span class="p">,</span> <span class="n">target</span>
-                <span class="p">)</span>
-
-    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_target_name_device_map</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">_QPU_DEVICE_NAME_TARGET_NAME_MAP</span><span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">]:</span> <span class="n">d</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">devices</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">_QPU_DEVICE_NAME_TARGET_NAME_MAP</span>
+    <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -1093,9 +1039,9 @@ for closing it.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/pulser_azure/connection.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">supports_open_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">supports_open_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Flag to confirm this class can support creating an open batch.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
