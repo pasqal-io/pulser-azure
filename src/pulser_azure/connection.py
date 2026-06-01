@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dataclasses import dataclass
 import json
 import logging
 import os
 import typing
-from typing import Any, Iterable, Mapping, cast
+from typing import Any, Mapping
 
 from pulser.backend import EmulationConfig
 import urllib3
@@ -26,8 +25,7 @@ from azure.quantum import JobStatus as AzureJobStatus
 from azure.quantum import SessionStatus
 from azure.quantum.job import Job
 from azure.quantum.job.session import Session
-from azure.quantum.target import Target
-from azure.quantum.target.pasqal import Pasqal, PasqalTarget
+from azure.quantum.target.pasqal import Pasqal
 from azure.quantum.workspace import Workspace
 from pulser import Sequence
 from pulser.backend.remote import (
@@ -74,16 +72,10 @@ _AZURE_SESSION_STATUS_MAP: dict[SessionStatus, BatchStatus] = {
     SessionStatus.TIMED_OUT: BatchStatus.TIMED_OUT,
 }
 
-
-@dataclass(frozen=True)
-class _PasqalTarget:
-    enum_name: str
-    enum_value: str
-
-
-_TARGETS = set(
-    [_PasqalTarget(enum_name=pt.name, enum_value=pt.value) for pt in PasqalTarget]
-)
+_QPU_DEVICE_NAME_TARGET_NAME_MAP: dict[str, str] = {
+    "FRESNEL_CAN1": "pasqal.qpu.fresnel-can1",
+    "FRESNEL": "pasqal.qpu.fresnel",
+}
 
 
 class AzureConnection(RemoteConnection):
@@ -101,9 +93,6 @@ class AzureConnection(RemoteConnection):
             resource_id=resource_id or os.getenv("PULSER_AZURE_RESOURCE_ID"),
             credential=credential,
         )
-        self._target_name_device_map: dict[str, Device] = {}
-        self._target_name_target_map: dict[str, Pasqal] = {}
-        self._device_name_target_map: dict[str, str] = {}
 
     def submit(
         self,
@@ -129,11 +118,15 @@ class AzureConnection(RemoteConnection):
         """
         open_explicit = open is not _UNSET
 
+        # target_name is set only when using BaseRemoteEmulatorBackend
         if target_name is None:
-            target_name = self._device_name_target_map[sequence.device.name]
+            target_name = _QPU_DEVICE_NAME_TARGET_NAME_MAP[sequence.device.name]
 
-        target = self._target_name_target_map.get(target_name)
-        if target is None:
+        target: Pasqal | None = self._workspace.get_targets(  # ty: ignore[invalid-assignment]
+            name=target_name, provider_id=_PASQAL_PROVIDER_ID
+        )
+
+        if not target:
             raise RuntimeError(
                 f"The target {target_name} isn't available on your workspace"
             )
@@ -151,6 +144,11 @@ class AzureConnection(RemoteConnection):
         owns_session = False
 
         if batch_id:
+            # when fetching the target from azure, the session isn't attached
+            # to it even if it is still open
+            session = self._workspace.get_session(batch_id)
+            target.latest_session = session
+
             job_ids = self._submit_jobs(
                 target=target,
                 sequence=sequence,
@@ -343,50 +341,17 @@ class AzureConnection(RemoteConnection):
     def fetch_available_devices(self) -> dict[str, Device]:
         """Fetches the devices available through this connection."""
 
-        if not self._target_name_device_map:
-            # Only retrieve targets available through current workspace provider's plan
-            raw_targets = self._workspace.get_targets(provider_id=_PASQAL_PROVIDER_ID)
-            if isinstance(raw_targets, Target):
-                targets: list[Target] = [raw_targets]
-            else:
-                targets = list(cast(Iterable[Target], raw_targets))
+        # Only build real QPU devices
+        devices = [
+            Device.from_abstract_repr(spec["specs"])
+            for spec in self._get_device_specs()
+        ]
 
-            # Only build real QPU devices
-            devices = [
-                Device.from_abstract_repr(spec["specs"])
-                for spec in self._get_device_specs()
-            ]
-
-            # Iterate over all PasqalTarget values rather than only workspace
-            # targets: free-plan users need real Device objects to author and
-            # validate sequences locally even when their workspace only exposes
-            # an emulator target (e.g. SIM_EMU_FREE).
-            for _target in _TARGETS:
-                target = next(
-                    (t for t in targets if t.name == _target.enum_value), None
-                )
-
-                device = next(
-                    (
-                        d
-                        for d in devices
-                        if d.name == _target.enum_name.removeprefix("QPU_")
-                    ),
-                    None,
-                )
-
-                if device:
-                    self._target_name_device_map[_target.enum_value] = device
-                    self._device_name_target_map[device.name] = _target.enum_value
-
-                if target:
-                    # Targets returned from the pasqal provider are Pasqal
-                    # instances at runtime; cast for the type checker.
-                    self._target_name_target_map[_target.enum_value] = cast(
-                        Pasqal, target
-                    )
-
-        return {k: v for k, v in self._target_name_device_map.items()}
+        return {
+            _QPU_DEVICE_NAME_TARGET_NAME_MAP[d.name]: d
+            for d in devices
+            if d.name in _QPU_DEVICE_NAME_TARGET_NAME_MAP
+        }
 
     def _get_device_specs(self) -> dict:
         response = urllib3.request(
