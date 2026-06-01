@@ -41,9 +41,9 @@ for the full sequence-writing reference.
 
 Pulser Azure exposes several remote emulator backends:
 
-- [`RemoteEmuSVBackend`][pulser_azure.backends.RemoteEmuSVBackend] — state vector emulator
-- [`RemoteEmuMPSBackend`][pulser_azure.backends.RemoteEmuMPSBackend] — MPS emulator
-- [`RemoteEmuFreeBackend`][pulser_azure.backends.RemoteEmuFreeBackend] — free-tier emulator
+- [`EmuSVBackend`][pulser_azure.EmuSVBackend] — state vector emulator
+- [`EmuMPSBackend`][pulser_azure.EmuMPSBackend] — matrix product states emulator
+- [`EmuFreeBackend`][pulser_azure.EmuFreeBackend] — free-tier emulator
 
 Use them in place of `QPUBackend` to run the same sequences without consuming
 real QPU time:

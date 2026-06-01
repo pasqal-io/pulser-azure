@@ -30,6 +30,7 @@ plugins:
       handlers:
         python:
           paths: [src]
+          load_external_modules: true
           options:
             docstring_style: google
             show_source: true
@@ -47,6 +48,5 @@ nav:
   - Home: index.md
   - Getting started: getting-started.md
   - API reference:
-    - Overview: reference/index.md
-    - Connection: reference/connection.md
-    - Backends: reference/backends.md
+      - Overview: reference/index.md
+      - Connection: reference/connection.md

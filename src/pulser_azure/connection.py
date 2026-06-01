@@ -18,6 +18,7 @@ import os
 import typing
 from typing import Any, Mapping
 
+from pasqal_cloud.device.device_types import DeviceTypeName
 from pulser.backend import EmulationConfig
 import urllib3
 from azure.identity import DefaultAzureCredential
@@ -75,6 +76,12 @@ _QPU_DEVICE_NAME_TARGET_NAME_MAP: dict[str, str] = {
     "FRESNEL": "pasqal.qpu.fresnel",
 }
 
+_EMU_DEVICE_NAME_TARGET_NAME_MAP: dict[str, str] = {
+    "EMU_MPS": "pasqal.sim.emu-mps",
+    "EMU_SV": "pasqal.sim.emu-sv",
+    "EMU_FREE": "pasqal.sim.emu-free",
+}
+
 
 class AzureConnection(RemoteConnection):
     """Azure Quantum connection bridge.
@@ -98,8 +105,8 @@ class AzureConnection(RemoteConnection):
         wait: bool = False,
         open: bool = False,
         batch_id: str | None = None,
-        emulation_config: EmulationConfig | None = None,
-        target_name: str | None = None,
+        device_type: DeviceTypeName | None = None,
+        backend_configuration: EmulationConfig | None = None,
         **kwargs: Any,
     ) -> RemoteResults:
         """Submit a job for execution.
@@ -115,9 +122,11 @@ class AzureConnection(RemoteConnection):
           returning.
         """
 
-        # target_name is set only when using BaseRemoteEmulatorBackend
-        if target_name is None:
+        # device_type is set only when using RemoteEmulatorBackend
+        if device_type is None:
             target_name = _QPU_DEVICE_NAME_TARGET_NAME_MAP[sequence.device.name]
+        else:
+            target_name = _EMU_DEVICE_NAME_TARGET_NAME_MAP[device_type]
 
         target: Pasqal | None = self._workspace.get_targets(  # ty: ignore[invalid-assignment]
             name=target_name, provider_id=_PASQAL_PROVIDER_ID
@@ -150,7 +159,7 @@ class AzureConnection(RemoteConnection):
                 target=target,
                 sequence=sequence,
                 job_params=job_params,
-                emulation_config=emulation_config,
+                emulation_config=backend_configuration,
             )
         else:
             batch_id = self._setup_session(target)
@@ -160,7 +169,7 @@ class AzureConnection(RemoteConnection):
                 target=target,
                 sequence=sequence,
                 job_params=job_params,
-                emulation_config=emulation_config,
+                emulation_config=backend_configuration,
             )
 
         if wait:
