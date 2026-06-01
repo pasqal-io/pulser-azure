@@ -71,12 +71,8 @@ _AZURE_SESSION_STATUS_MAP: dict[SessionStatus, BatchStatus] = {
 }
 
 _QPU_DEVICE_NAME_TARGET_NAME_MAP: dict[str, str] = {
-    "FRESNEL_CAN1": "pasqal.qpu.fresnel-can1"
-}
-
-# Reversed map to get the Azure target name from Pasqal's device type name
-_TARGET_NAME_QPU_DEVICE_NAME_MAP: dict[str, str] = {
-    v: k for k, v in _QPU_DEVICE_NAME_TARGET_NAME_MAP.items()
+    "FRESNEL_CAN1": "pasqal.qpu.fresnel-can1",
+    "FRESNEL": "pasqal.qpu.fresnel",
 }
 
 
@@ -115,7 +111,7 @@ class AzureConnection(RemoteConnection):
             name=target_name, provider_id=_PASQAL_PROVIDER_ID
         )
 
-        if target is None:
+        if not target:
             raise RuntimeError(
                 f"The target {target_name} isn't available on your workspace"
             )
