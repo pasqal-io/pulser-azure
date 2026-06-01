@@ -71,18 +71,16 @@ _AZURE_SESSION_STATUS_MAP: dict[SessionStatus, BatchStatus] = {
     SessionStatus.TIMED_OUT: BatchStatus.TIMED_OUT,
 }
 
-_QPU_DEVICE_NAME_TARGET_NAME_MAP: dict[DeviceTypeName, str] = {
-    DeviceTypeName.FRESNEL_CAN1: "pasqal.qpu.fresnel-can1"
-}
-_EMU_DEVICE_NAME_TARGET_NAME_MAP: dict[DeviceTypeName, str] = {
-    DeviceTypeName.EMU_MPS: "pasqal.sim.emu-mps",
-    DeviceTypeName.EMU_SV: "pasqal.sim.emu-sv",
-    DeviceTypeName.EMU_FREE: "pasqal.sim.emu-free",
+
+_QPU_DEVICE_NAME_TARGET_NAME_MAP: dict[str, str] = {
+    "FRESNEL_CAN1": "pasqal.qpu.fresnel-can1",
+    "FRESNEL": "pasqal.qpu.fresnel",
 }
 
-# Reversed map to get the Azure target name from Pasqal's device type name
-_TARGET_NAME_QPU_DEVICE_NAME_MAP: dict[str, str] = {
-    v: k for k, v in _QPU_DEVICE_NAME_TARGET_NAME_MAP.items()
+_EMU_DEVICE_NAME_TARGET_NAME_MAP: dict[str, str] = {
+    "EMU_MPS": "pasqal.sim.emu-mps",
+    "EMU_SV": "pasqal.sim.emu-sv",
+    "EMU_FREE": "pasqal.sim.emu-free",
 }
 
 
@@ -112,6 +110,18 @@ class AzureConnection(RemoteConnection):
         backend_configuration: EmulationConfig | None = None,
         **kwargs: Any,
     ) -> RemoteResults:
+        """Submit a job for execution.
+
+        Session ownership rule: the caller that opens a session is responsible
+        for closing it.
+
+        - ``open=True`` (open_batch): opens a session, returns without
+          submitting jobs. Caller closes via ``_close_batch`` on exit.
+        - ``batch_id`` provided: submits jobs into the caller's session and
+          leaves it open.
+        - Neither: opens a session, submits jobs, and closes it before
+          returning.
+        """
 
         # device_type is set only when using RemoteEmulatorBackend
         if device_type is None:
@@ -123,7 +133,7 @@ class AzureConnection(RemoteConnection):
             name=target_name, provider_id=_PASQAL_PROVIDER_ID
         )
 
-        if target is None:
+        if not target:
             raise RuntimeError(
                 f"The target {target_name} isn't available on your workspace"
             )
@@ -341,7 +351,7 @@ class AzureConnection(RemoteConnection):
         ]
 
         return {
-            _QPU_DEVICE_NAME_TARGET_NAME_MAP[d.name]: d  # ty: ignore[invalid-argument-type]
+            _QPU_DEVICE_NAME_TARGET_NAME_MAP[d.name]: d
             for d in devices
             if d.name in _QPU_DEVICE_NAME_TARGET_NAME_MAP
         }
