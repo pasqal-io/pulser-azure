@@ -16,8 +16,6 @@
         <link rel="prev" href="../">
       
       
-        <link rel="next" href="../backends/">
-      
       
         
       
@@ -494,34 +492,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../backends/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Backends
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -736,14 +706,14 @@
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>src/pulser_azure/connection.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span>
-<span class="normal">89</span>
-<span class="normal">90</span>
-<span class="normal">91</span>
-<span class="normal">92</span>
-<span class="normal">93</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="n">credential</span> <span class="o">=</span> <span class="n">DefaultAzureCredential</span><span class="p">(</span>
         <span class="n">exclude_interactive_browser_credential</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">)</span>
@@ -780,8 +750,8 @@
     <span class="n">wait</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="nb">open</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">batch_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">emulation_config</span><span class="p">:</span> <span class="n">EmulationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">target_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">device_type</span><span class="p">:</span> <span class="n">DeviceTypeName</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend_configuration</span><span class="p">:</span> <span class="n">EmulationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RemoteResults</span>
 </code></pre></div>
@@ -803,14 +773,7 @@ for closing it.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/pulser_azure/connection.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
@@ -882,14 +845,23 @@ for closing it.</p>
 <span class="normal">171</span>
 <span class="normal">172</span>
 <span class="normal">173</span>
-<span class="normal">174</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">sequence</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
     <span class="n">wait</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="nb">open</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">batch_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">emulation_config</span><span class="p">:</span> <span class="n">EmulationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">target_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">device_type</span><span class="p">:</span> <span class="n">DeviceTypeName</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">backend_configuration</span><span class="p">:</span> <span class="n">EmulationConfig</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RemoteResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Submit a job for execution.</span>
@@ -905,9 +877,11 @@ for closing it.</p>
 <span class="sd">      returning.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># target_name is set only when using BaseRemoteEmulatorBackend</span>
-    <span class="k">if</span> <span class="n">target_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># device_type is set only when using RemoteEmulatorBackend</span>
+    <span class="k">if</span> <span class="n">device_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">target_name</span> <span class="o">=</span> <span class="n">_QPU_DEVICE_NAME_TARGET_NAME_MAP</span><span class="p">[</span><span class="n">sequence</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">target_name</span> <span class="o">=</span> <span class="n">_EMU_DEVICE_NAME_TARGET_NAME_MAP</span><span class="p">[</span><span class="n">device_type</span><span class="p">]</span>
 
     <span class="n">target</span><span class="p">:</span> <span class="n">Pasqal</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="o">.</span><span class="n">get_targets</span><span class="p">(</span>  <span class="c1"># ty: ignore[invalid-assignment]</span>
         <span class="n">name</span><span class="o">=</span><span class="n">target_name</span><span class="p">,</span> <span class="n">provider_id</span><span class="o">=</span><span class="n">_PASQAL_PROVIDER_ID</span>
@@ -940,7 +914,7 @@ for closing it.</p>
             <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
             <span class="n">sequence</span><span class="o">=</span><span class="n">sequence</span><span class="p">,</span>
             <span class="n">job_params</span><span class="o">=</span><span class="n">job_params</span><span class="p">,</span>
-            <span class="n">emulation_config</span><span class="o">=</span><span class="n">emulation_config</span><span class="p">,</span>
+            <span class="n">emulation_config</span><span class="o">=</span><span class="n">backend_configuration</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">batch_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_session</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
@@ -950,7 +924,7 @@ for closing it.</p>
             <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
             <span class="n">sequence</span><span class="o">=</span><span class="n">sequence</span><span class="p">,</span>
             <span class="n">job_params</span><span class="o">=</span><span class="n">job_params</span><span class="p">,</span>
-            <span class="n">emulation_config</span><span class="o">=</span><span class="n">emulation_config</span><span class="p">,</span>
+            <span class="n">emulation_config</span><span class="o">=</span><span class="n">backend_configuration</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">wait</span><span class="p">:</span>
@@ -986,20 +960,20 @@ for closing it.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/pulser_azure/connection.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">343</span>
 <span class="normal">344</span>
 <span class="normal">345</span>
 <span class="normal">346</span>
-<span class="normal">347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_available_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Device</span><span class="p">]:</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">fetch_available_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Device</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetches the devices available through this connection.&quot;&quot;&quot;</span>
 
     <span class="c1"># Only build real QPU devices</span>
@@ -1037,9 +1011,9 @@ for closing it.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/pulser_azure/connection.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">supports_open_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">supports_open_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Flag to confirm this class can support creating an open batch.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>

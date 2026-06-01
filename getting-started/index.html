@@ -458,34 +458,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/backends/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Backends
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -632,13 +604,13 @@ for the full sequence-writing reference.</p>
 <h2 id="running-on-emulators">Running on emulators<a class="headerlink" href="#running-on-emulators" title="Permanent link">&para;</a></h2>
 <p>Pulser Azure exposes several remote emulator backends:</p>
 <ul>
-<li><a class="autorefs autorefs-internal" title="            RemoteEmuSVBackend" href="../reference/backends/#pulser_azure.backends.RemoteEmuSVBackend"><code>RemoteEmuSVBackend</code></a> — state vector emulator</li>
-<li><a class="autorefs autorefs-internal" title="            RemoteEmuMPSBackend" href="../reference/backends/#pulser_azure.backends.RemoteEmuMPSBackend"><code>RemoteEmuMPSBackend</code></a> — MPS emulator</li>
-<li><a class="autorefs autorefs-internal" title="            RemoteEmuFreeBackend" href="../reference/backends/#pulser_azure.backends.RemoteEmuFreeBackend"><code>RemoteEmuFreeBackend</code></a> — free-tier emulator</li>
+<li><a class="autorefs autorefs-internal" title="            EmuSVBackend" href="../reference/#pulser_azure.EmuSVBackend"><code>EmuSVBackend</code></a> — state vector emulator</li>
+<li><a class="autorefs autorefs-internal" title="            EmuMPSBackend" href="../reference/#pulser_azure.EmuMPSBackend"><code>EmuMPSBackend</code></a> — matrix product states emulator</li>
+<li><a class="autorefs autorefs-internal" title="            EmuFreeBackend" href="../reference/#pulser_azure.EmuFreeBackend"><code>EmuFreeBackend</code></a> — free-tier emulator</li>
 </ul>
 <p>Use them in place of <code>QPUBackend</code> to run the same sequences without consuming
 real QPU time:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pulser_azure</span><span class="w"> </span><span class="kn">import</span> <span class="n">AzureConnection</span><span class="p">,</span> <span class="n">RemoteEmuMPSBackend</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pulser_azure</span><span class="w"> </span><span class="kn">import</span> <span class="n">AzureConnection</span><span class="p">,</span> <span class="n">EmuMPSBackend</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pulser.pulse</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pulse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pulser</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Register</span>
 
@@ -661,7 +633,7 @@ real QPU time:</p>
 <span class="n">sequence</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">generic_pulse</span><span class="p">,</span> <span class="s2">&quot;rydberg&quot;</span><span class="p">)</span>
 
 <span class="c1"># Declare a backend based on the sequence and remote connection</span>
-<span class="n">backend</span> <span class="o">=</span> <span class="n">RemoteEmuMPSBackend</span><span class="p">(</span><span class="n">sequence</span><span class="o">=</span><span class="n">sequence</span><span class="p">,</span> <span class="n">connection</span><span class="o">=</span><span class="n">connection</span><span class="p">)</span>
+<span class="n">backend</span> <span class="o">=</span> <span class="n">EmuMPSBackend</span><span class="p">(</span><span class="n">sequence</span><span class="o">=</span><span class="n">sequence</span><span class="p">,</span> <span class="n">connection</span><span class="o">=</span><span class="n">connection</span><span class="p">)</span>
 
 <span class="c1"># Run jobs with different arguments over the same sequence and register</span>
 <span class="n">results</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
