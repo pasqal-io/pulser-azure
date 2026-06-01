@@ -71,7 +71,6 @@ _AZURE_SESSION_STATUS_MAP: dict[SessionStatus, BatchStatus] = {
     SessionStatus.TIMED_OUT: BatchStatus.TIMED_OUT,
 }
 
-
 _QPU_DEVICE_NAME_TARGET_NAME_MAP: dict[str, str] = {
     "FRESNEL_CAN1": "pasqal.qpu.fresnel-can1",
     "FRESNEL": "pasqal.qpu.fresnel",
