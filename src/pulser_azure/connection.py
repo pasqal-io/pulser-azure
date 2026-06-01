@@ -102,6 +102,18 @@ class AzureConnection(RemoteConnection):
         target_name: str | None = None,
         **kwargs: Any,
     ) -> RemoteResults:
+        """Submit a job for execution.
+
+        Session ownership rule: the caller that opens a session is responsible
+        for closing it.
+
+        - ``open=True`` (open_batch): opens a session, returns without
+          submitting jobs. Caller closes via ``_close_batch`` on exit.
+        - ``batch_id`` provided: submits jobs into the caller's session and
+          leaves it open.
+        - Neither: opens a session, submits jobs, and closes it before
+          returning.
+        """
 
         # target_name is set only when using BaseRemoteEmulatorBackend
         if target_name is None:
