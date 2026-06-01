@@ -83,14 +83,6 @@ class _PasqalTarget:
 
 _TARGETS = set(
     [_PasqalTarget(enum_name=pt.name, enum_value=pt.value) for pt in PasqalTarget]
-    + [
-        _PasqalTarget(enum_name="SIM_EMU_SV", enum_value="pasqal.sim.emu-sv"),
-        _PasqalTarget(enum_name="SIM_EMU_MPS", enum_value="pasqal.sim.emu-mps"),
-        _PasqalTarget(enum_name="SIM_EMU_FREE", enum_value="pasqal.sim.emu-free"),
-        _PasqalTarget(
-            enum_name="QPU_FRESNEL_CAN1", enum_value="pasqal.qpu.fresnel-can1"
-        ),
-    ]
 )
 
 

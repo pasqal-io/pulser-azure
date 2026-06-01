@@ -47,7 +47,7 @@ wheels = [
 
 [[package]]
 name = "azure-quantum"
-version = "3.8.0"
+version = "3.10.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "azure-core" },
@@ -58,9 +58,9 @@ dependencies = [
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/85/2f/d8581c0635c726a0aa53b67688434b03d01b09b40964937bf9b0f5658e0d/azure_quantum-3.8.0.tar.gz", hash = "sha256:aa6b4cbe386a7bce9714d85577b03c58ca2b730b8a0e3292a593006e328cc60c", size = 132425, upload-time = "2026-03-23T22:35:27.168Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/41/1d/d791eedf1c0cb934d0db05577bd0f486226bfa273870659afbad63bc9dab/azure_quantum-3.10.0.tar.gz", hash = "sha256:870322164bdfa67dc79e434d8c5c5153351c601ff31d607d1f00116165735f14", size = 132599, upload-time = "2026-05-27T22:59:22.693Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/07/2d/0821e990b993b1a5b3453e76fe868b4c07731980ff7f9152e60948a10a6b/azure_quantum-3.8.0-py3-none-any.whl", hash = "sha256:922a76faeb3a29f42cc3c0ae0efd324ae789305533f00a4c26f0b72332270e96", size = 166641, upload-time = "2026-03-23T22:35:28.494Z" },
+    { url = "https://files.pythonhosted.org/packages/24/64/b81b323e4bdb2a91893258ee031b5d2c0472d67e1f8d5368c21102517255/azure_quantum-3.10.0-py3-none-any.whl", hash = "sha256:01ac7722f2f42a479cc1cc2bc54270c88133ea2bc0da3095e9162b40e3dbd096", size = 166765, upload-time = "2026-05-27T22:59:24.022Z" },
 ]
 
 [[package]]
@@ -1559,7 +1559,7 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "azure-quantum", specifier = ">=3.8.0" },
+    { name = "azure-quantum", specifier = ">=3.9.1" },
     { name = "pulser-core", specifier = ">=1.7.2" },
     { name = "urllib3", specifier = ">=2.6.3" },
 ]
