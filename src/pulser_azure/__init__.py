@@ -12,16 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__all__ = [
-    "AzureConnection",
-    "EmuMPSBackend",
-    "EmuSVBackend",
-    "EmuFreeBackend",
-]
+__all__ = ["AzureConnection"]
 
 from pulser_azure.connection import AzureConnection
-from pasqal_cloud.backends import (
-    EmuMPSBackend,
-    EmuSVBackend,
-    EmuFreeBackend,
-)

@@ -1,6 +1,8 @@
-from pulser_azure import AzureConnection, EmuMPSBackend
-from pulser.pulse import Pulse
+from pasqal_cloud import RemoteMPSBackend
 from pulser import Sequence, Register
+from pulser.pulse import Pulse
+
+from pulser_azure import AzureConnection
 
 connection = AzureConnection()
 
@@ -21,7 +23,7 @@ generic_pulse = Pulse.ConstantPulse(100, omega_max, 2, 0.0)
 sequence.add(generic_pulse, "rydberg")
 
 # Declare a backend based on the sequence and remote connection
-backend = EmuMPSBackend(sequence=sequence, connection=connection)
+backend = RemoteMPSBackend(sequence=sequence, connection=connection)
 
 # Run jobs with different arguments over the same sequence and register
 results = backend.run(
