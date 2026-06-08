@@ -43,7 +43,7 @@ Pulser Azure can be used with several [remote emulator backends](https://docs.pa
 
 - `RemoteSVBackend` — state vector emulator
 - `RemoteMPSBackend` — matrix product states emulator
-- `RemoteFreeBackend` — qutip emulator
+- `RemoteQutipBackend` — qutip emulator
 
 Use them in place of `QPUBackend` to run the same sequences without consuming
 real QPU time:
