@@ -30,7 +30,6 @@ plugins:
       handlers:
         python:
           paths: [src]
-          load_external_modules: true
           options:
             docstring_style: google
             show_source: true

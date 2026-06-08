@@ -1,6 +1,7 @@
-from pulser_azure import AzureConnection
 from pulser.pulse import Pulse
 from pulser import QPUBackend, Sequence, Register
+
+from pulser_azure import AzureConnection
 
 connection = AzureConnection()
 
