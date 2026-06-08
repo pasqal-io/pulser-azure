@@ -1419,7 +1419,7 @@ wheels = [
 [[package]]
 name = "pasqal-cloud"
 version = "0.22.0"
-source = { git = "https://github.com/pasqal-io/pasqal-cloud?subdirectory=pasqal-cloud#e7a83193742535d45870eab1ece5832741ff8118" }
+source = { git = "https://github.com/pasqal-io/pasqal-cloud?subdirectory=pasqal-cloud#1c7d8309a6ed90822dd52a8c0b42b84b7f1117ee" }
 dependencies = [
     { name = "auth0-python" },
     { name = "pulser-core" },
