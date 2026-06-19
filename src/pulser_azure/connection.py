@@ -158,6 +158,7 @@ class AzureConnection(RemoteConnection):
             job_ids = self._submit_jobs(
                 target=target,
                 sequence=sequence,
+                open=True,
                 job_params=job_params,
                 emulation_config=backend_configuration,
             )
@@ -198,6 +199,7 @@ class AzureConnection(RemoteConnection):
         target: Pasqal,
         sequence: Sequence,
         job_params: list[JobParams],
+        open: bool = False,
         emulation_config: EmulationConfig | None = None,
     ) -> list[str]:
         sequence = self._add_measurement_to_sequence(sequence)
@@ -217,6 +219,8 @@ class AzureConnection(RemoteConnection):
         for params in job_params:
             input_params = {**params}
             shots = input_params.pop("runs", None)
+            if open:
+                input_params["open_batch"] = True
 
             job = target.submit(
                 input_data=input_data, input_params=input_params, shots=shots
