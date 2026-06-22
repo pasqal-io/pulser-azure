@@ -158,7 +158,7 @@ class AzureConnection(RemoteConnection):
             job_ids = self._submit_jobs(
                 target=target,
                 sequence=sequence,
-                open=True,
+                open_batch=True,
                 job_params=job_params,
                 emulation_config=backend_configuration,
             )
@@ -199,9 +199,14 @@ class AzureConnection(RemoteConnection):
         target: Pasqal,
         sequence: Sequence,
         job_params: list[JobParams],
-        open: bool = False,
+        open_batch: bool = False,
         emulation_config: EmulationConfig | None = None,
     ) -> list[str]:
+        """
+        Submits jobs for execution through a Pasqal target which is attached to a session.
+        A session will always be opened to comply with RemoteResults interface.
+        However a batch will be left open only if open_batch=True
+        """
         sequence = self._add_measurement_to_sequence(sequence)
 
         if sequence.is_parametrized() or sequence.is_register_mappable():
@@ -215,11 +220,13 @@ class AzureConnection(RemoteConnection):
             input_data["emulation_config"] = emulation_config.to_abstract_repr()
 
         job_ids: list[str] = []
+        if len(job_params) > 1:
+            open_batch = True
 
         for params in job_params:
             input_params = {**params}
             shots = input_params.pop("runs", None)
-            if open:
+            if open_batch:
                 input_params["open_batch"] = True
 
             job = target.submit(
