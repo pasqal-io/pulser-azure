@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 import pytest
 from pulser import QPUBackend
@@ -31,7 +31,9 @@ def test_qpu_backend_submits_to_target_matching_sequence_device(
         session_cls.return_value.id = "session-1"
         backend.run(job_params=[{"runs": 5}], wait=False)
 
-    fake_pasqal_targets[_DEFAULT_QPU_TARGET].submit.assert_called_once()
+    fake_pasqal_targets[_DEFAULT_QPU_TARGET].submit.assert_called_once_with(
+        input_data=ANY, input_params={}, shots=5
+    )
     fake_pasqal_targets[_EMU_MPS_TARGET].submit.assert_not_called()
 
 
