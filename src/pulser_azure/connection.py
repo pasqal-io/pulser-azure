@@ -220,6 +220,9 @@ class AzureConnection(RemoteConnection):
             input_data["emulation_config"] = emulation_config.to_abstract_repr()
 
         job_ids: list[str] = []
+
+        # To make sure jobs are grouped in the same batch on Pasqal's side when sending multiple jobs
+        # since the Pasqal api only receives one job at a time
         if len(job_params) > 1:
             open_batch = True
 
