@@ -7,13 +7,34 @@ from pulser import QPUBackend
 from tests.conftest import _DEFAULT_QPU_TARGET
 
 
-def test_run_without_open_batch_closes_session(sequence, wired_connection):
+def test_run_without_open_batch_closes_session(
+    sequence, wired_connection, fake_pasqal_targets
+):
     """Plain RemoteBackend.run() must not leak Azure sessions."""
     backend = QPUBackend(sequence=sequence, connection=wired_connection)
 
     with patch("pulser_azure.connection.Session") as session_cls:
         session_cls.return_value.id = "session-classic"
         backend.run(job_params=[{"runs": 5}], wait=False)
+
+    wired_connection._workspace.open_session.assert_called_once()
+    wired_connection._workspace.close_session.assert_called_once()
+
+    fresnel = fake_pasqal_targets[_DEFAULT_QPU_TARGET]
+    input_params = fresnel.submit.call_args[1]["input_params"]
+
+    assert "open_batch" not in input_params
+
+
+def test_run_without_open_batch_and_multiple_jobs_closes_session(
+    sequence, wired_connection
+):
+    """Plain RemoteBackend.run() must not leak Azure sessions."""
+    backend = QPUBackend(sequence=sequence, connection=wired_connection)
+
+    with patch("pulser_azure.connection.Session") as session_cls:
+        session_cls.return_value.id = "session-classic"
+        backend.run(job_params=[{"runs": 5}, {"runs": 2}], wait=False)
 
     wired_connection._workspace.open_session.assert_called_once()
     wired_connection._workspace.close_session.assert_called_once()
@@ -37,6 +58,11 @@ def test_run_with_open_batch_keeps_session_open_until_exit(
 
             backend.run(job_params=[{"runs": 5}], wait=False)
 
+            fresnel = fake_pasqal_targets[_DEFAULT_QPU_TARGET]
+            input_params = fresnel.submit.call_args[1]["input_params"]
+
+            assert input_params["open_batch"]
+
             assert wired_connection._workspace.open_session.call_count == 1
             assert wired_connection._workspace.close_session.call_count == 0
 
@@ -45,8 +71,23 @@ def test_run_with_open_batch_keeps_session_open_until_exit(
             assert wired_connection._workspace.close_session.call_count == 0
 
     assert wired_connection._workspace.close_session.call_count == 1
-    fresnel = fake_pasqal_targets[_DEFAULT_QPU_TARGET]
     assert fresnel.submit.call_count == 2
+
+
+def test_run_multiple_jobs_without_open_batch_sets_open_batch_to_true(
+    sequence, wired_connection, fake_pasqal_targets
+):
+    """Plain RemoteBackend.run() must not leak Azure sessions."""
+    backend = QPUBackend(sequence=sequence, connection=wired_connection)
+
+    with patch("pulser_azure.connection.Session") as session_cls:
+        session_cls.return_value.id = "session-classic"
+        backend.run(job_params=[{"runs": 5}, {"runs": 2}], wait=False)
+
+    fresnel = fake_pasqal_targets[_DEFAULT_QPU_TARGET]
+    input_parms = fresnel.submit.call_args[1]["input_params"]
+
+    assert input_parms["open_batch"]
 
 
 def test_open_batch_run_reattaches_session_to_fresh_target(sequence, wired_connection):
