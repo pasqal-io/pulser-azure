@@ -280,9 +280,7 @@ class AzureConnection(RemoteConnection):
         for job in jobs:
             job.refresh()
 
-            status = _AZURE_JOB_STATUS_MAP.get(  # ty: ignore[no-matching-overload]
-                job.details.status, JobStatus.ERROR
-            )
+            status = _AZURE_JOB_STATUS_MAP.get(job.details.status, JobStatus.ERROR)
 
             result: Results | None = None
             if job.has_succeeded():
@@ -350,9 +348,7 @@ class AzureConnection(RemoteConnection):
     def _get_batch_status(self, batch_id: str) -> BatchStatus:
         """Gets the status of a batch from its ID."""
         session = self._workspace.get_session(session_id=batch_id)
-        return _AZURE_SESSION_STATUS_MAP.get(  # ty: ignore[no-matching-overload]
-            session.details.status, BatchStatus.ERROR
-        )
+        return _AZURE_SESSION_STATUS_MAP.get(session.details.status, BatchStatus.ERROR)
 
     def _get_job_ids(self, batch_id: str) -> list[str]:
         """Gets all the job IDs within a batch."""
