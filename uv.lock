@@ -600,7 +600,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -1546,7 +1546,7 @@ wheels = [
 [[package]]
 name = "pasqal-cloud"
 version = "0.23.0"
-source = { git = "https://github.com/pasqal-io/pasqal-cloud?subdirectory=pasqal-cloud#af6b4f8ba11ed502f0d7b27d681370c8a9feb3f3" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "auth0-python" },
     { name = "pulser-core" },
@@ -1554,6 +1554,10 @@ dependencies = [
     { name = "pyjwt", extra = ["crypto"] },
     { name = "requests" },
     { name = "tenacity" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ec/1a/ba2b702f2fb988501171d9b045c5cdd0086e9be3dc3fe372cb8746a7c991/pasqal_cloud-0.23.0.tar.gz", hash = "sha256:8d76b1678fd84421be0aca0351beae5ee2086286fa238f26a1ef399685a4bec8", size = 43004, upload-time = "2026-06-30T14:17:17.703Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/60/2c/9d0dda1c7d0b6fbf63d89a79084f19a017cfcd82baf786eda06f2e1320b6/pasqal_cloud-0.23.0-py3-none-any.whl", hash = "sha256:ba92672e887b08e145d052d1d6287f2eca7a5c431a31ddd3fc10fda6c4f73240", size = 52263, upload-time = "2026-06-30T14:17:15.17Z" },
 ]
 
 [[package]]
@@ -1722,7 +1726,7 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "azure-quantum", specifier = ">=3.9.1" },
-    { name = "pasqal-cloud", git = "https://github.com/pasqal-io/pasqal-cloud?subdirectory=pasqal-cloud" },
+    { name = "pasqal-cloud", specifier = ">=0.23.0" },
     { name = "pulser-core", specifier = ">=1.8.0" },
     { name = "urllib3", specifier = ">=2.6.3" },
 ]
