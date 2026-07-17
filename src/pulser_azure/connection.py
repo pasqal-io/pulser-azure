@@ -302,7 +302,12 @@ class AzureConnection(RemoteConnection):
         self,
         raw_results: Any,
         job: Job,
-    ) -> SampledResult:
+    ) -> Results:
+        # If job was executed by an emulator, then we
+        # can try to retrieve the full job's result
+        if raw_results.get("serialised_results", None) is not None:
+            return Results.from_abstract_repr(raw_results["serialised_results"])
+
         input_data_uri = job.details.input_data_uri
         if not input_data_uri:
             raise ValueError(f"Job {job.id} has no input data URI")
