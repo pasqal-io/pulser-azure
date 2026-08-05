@@ -14,5 +14,9 @@
 
 __all__ = ["AzureConnection", "__version__"]
 
+from pulser.sequence import store_package_version_metadata
+
 from pulser_azure._version import __version__
 from pulser_azure.connection import AzureConnection
+
+store_package_version_metadata("pulser-azure", __version__)
